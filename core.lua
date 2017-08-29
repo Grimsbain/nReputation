@@ -2,6 +2,9 @@
 local gsub = string.gsub
 local find = string.find
 
+local checkboxOn = PlaySoundKitID and "igMainMenuOptionCheckBoxOn" or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+local checkboxOff = PlaySoundKitID and "igMainMenuOptionCheckBoxOff" or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
+
 -- Used to set session variables.
 local RegisterDefaultSetting = function(key,value)
     if ( nReputationDB == nil ) then
@@ -23,7 +26,7 @@ nReputationToggle.Text:SetPoint("RIGHT",nReputationToggle,"LEFT",-nReputationTog
 nReputationToggle:SetScale(.9)
 nReputationToggle:SetScript("OnClick", function(this)
     local checked = not not this:GetChecked()
-    PlaySound(checked and "igMainMenuOptionCheckBoxOn" or "igMainmenuOptionCheckBoxOff")
+    PlaySound(checked and checkboxOn or checkboxOff)
     nReputationDB.Toggle = checked
 end)
 
