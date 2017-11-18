@@ -2,7 +2,8 @@
 ## Title: |cffCC3333 n|rReputation
 ## Notes: Auto change watched reputation.
 ## Author: Grimsbain
-## Version: 1.1-release
+## Version: 1.2-release
 ## SavedVariablesPerCharacter: nReputationDB
+## X-WoWI-ID: 24506
 
 core.lua
