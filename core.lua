@@ -1,12 +1,9 @@
+local addon, nRep = ...
 
 local gsub = string.gsub
 local find = string.find
 
-local checkboxOn = PlaySoundKitID and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
-local checkboxOff = PlaySoundKitID and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
-
--- Used to set session variables.
-local RegisterDefaultSetting = function(key,value)
+function nRep:RegisterDefaultSetting(key, value)
     if ( nReputationDB == nil ) then
         nReputationDB = {}
     end
@@ -15,32 +12,7 @@ local RegisterDefaultSetting = function(key,value)
     end
 end
 
-RegisterDefaultSetting("Toggle",true)
-
-
--- UI Code
-local nReputationToggle = CreateFrame("CheckButton", "nReputationToggle", ReputationFrame, "InterfaceOptionsCheckButtonTemplate")
-nReputationToggle:SetPoint("TOPRIGHT", ReputationFrame, "TOPRIGHT", -5, -25)
-nReputationToggle.Text:SetText("Auto")
-nReputationToggle.Text:SetPoint("RIGHT",nReputationToggle,"LEFT",-nReputationToggle.Text:GetWidth()+1,0)
-nReputationToggle:SetScale(.9)
-nReputationToggle:SetScript("OnClick", function(this)
-    local checked = not not this:GetChecked()
-    PlaySound(checked and checkboxOn or checkboxOff)
-    nReputationDB.Toggle = checked
-end)
-
-
-nReputationToggle:SetScript("OnShow", function(self)
-    function UpdateToggle()
-        nReputationToggle:SetChecked(nReputationDB.Toggle)
-    end
-    UpdateToggle()
-    nReputationToggle:SetScript("OnShow", nil)
-end)
-
--- Proccess tracking changes. Will ignore guild and anything set to inactive.
-local SetWatched = function(newFaction)
+function nRep:SetWatched(newFaction)
     if running then
         return
     end
@@ -79,26 +51,27 @@ local SetWatched = function(newFaction)
     running = nil
 end
 
--- Reads faction change line and sets watched reputation.
-local listener = CreateFrame("Frame")
-listener:SetScript("OnEvent", function(self, event, ...)
-    if ( not nReputationDB.Toggle ) then return end
+function nReputation_OnLoad(self)
+	self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+	nRep:RegisterDefaultSetting("Toggle", true)
+end
 
-    local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+function nReputation_OnEvent(self, event, ...)
+	if ( event == "CHAT_MSG_COMBAT_FACTION_CHANGE" ) then
+	    if ( not nReputationDB.Toggle ) then return end
 
-    local pattern_standing_inc = gsub(gsub(FACTION_STANDING_INCREASED, "(%%s)", "(.+)"), "(%%d)", "(%%d+)")
+		local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
 
-    if ( event == "CHAT_MSG_COMBAT_FACTION_CHANGE" ) then
+		local pattern_standing_inc = gsub(gsub(FACTION_STANDING_INCREASED, "(%%s)", "(.+)"), "(%%d)", "(%%d+)")
+		local s1, e1, faction, amount = find(arg1, pattern_standing_inc)
 
-        local s1, e1, faction, amount = find(arg1, pattern_standing_inc)
+		if ( s1 ~= nil and amount ~= nil ) then
+			if ( faction ~= GUILD ) then
+				nRep:SetWatched(faction)
+			end
+		end
+	end
+end
 
-        if ( s1 ~= nil and amount ~= nil ) then
-            if ( faction ~= GUILD ) then
-                SetWatched(faction)
-            end
-        end
-    end
-end)
 
--- Listen for faction change events.
-listener:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+

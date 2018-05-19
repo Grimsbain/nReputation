@@ -1,0 +1,10 @@
+<Ui>
+	<Script file="core.lua" />
+	<Script file="ui.lua" />
+	<Frame name="nReputation">
+		<Scripts>
+			<OnLoad function="nReputation_OnLoad" />
+			<OnEvent function="nReputation_OnEvent" />
+		</Scripts>
+	</Frame>
+</Ui>
