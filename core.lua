@@ -13,7 +13,7 @@ function nRep:RegisterDefaultSetting(key, value)
 end
 
 function nRep:SetWatched(newFaction)
-    if running then
+    if ( running ) then
         return
     end
     running = true
@@ -22,17 +22,17 @@ function nRep:SetWatched(newFaction)
     local watchedFaction = select(1,GetWatchedFactionInfo())
     while i <= GetNumFactions() do
         local name, _, _, _, _, _, _, _, isHeader, isCollapsed, _, _, _, _, _, _ = GetFactionInfo(i)
-        if isHeader then
-            if name == FACTION_INACTIVE then
+        if ( isHeader ) then
+            if ( name == FACTION_INACTIVE ) then
                 break
             end
-            if isCollapsed then
+            if ( isCollapsed ) then
                 ExpandFactionHeader(i)
                 wasCollapsed[name] = true
             end
         end
-        if (name == newFaction) then
-            if (watchedFaction ~= newFaction) then
+        if ( name == newFaction ) then
+            if ( watchedFaction ~= newFaction ) then
                 SetWatchedFactionIndex(i)
             end
             break
@@ -42,7 +42,7 @@ function nRep:SetWatched(newFaction)
     i = 1
     while i <= GetNumFactions() do
         local name, _, _, _, _, _, _, _, isHeader, isCollapsed, _, _, _, _, _, _ = GetFactionInfo(i)
-        if isHeader and not isCollapsed and wasCollapsed[name] then
+        if ( isHeader and not isCollapsed and wasCollapsed[name] ) then
             CollapseFactionHeader(i)
             wasCollapsed[name] = nil
         end
@@ -72,6 +72,3 @@ function nReputation_OnEvent(self, event, ...)
 		end
 	end
 end
-
-
-
