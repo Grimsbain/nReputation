@@ -1,9 +1,9 @@
-local addon, nRep = ...
+local _, nRep = ...
 
 local gsub = string.gsub
 local find = string.find
 
-function nRep:RegisterDefaultSetting(key, value)
+local function RegisterDefaultSetting(key, value)
     if ( nReputationDB == nil ) then
         nReputationDB = {}
     end
@@ -12,7 +12,67 @@ function nRep:RegisterDefaultSetting(key, value)
     end
 end
 
-function nRep:SetWatched(newFaction)
+nReputationMixin = {}
+
+function nReputationMixin:OnLoad()
+    self:RegisterEvent("VARIABLES_LOADED")
+
+    self.optionName = "Toggle"
+    RegisterDefaultSetting("Toggle", true)
+end
+
+function nReputationMixin:TurnOn()
+	self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+end
+
+function nReputationMixin:TurnOff()
+	self:UnregisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+end
+
+function nReputationMixin:OnClick()
+    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+    local checked = self:GetChecked()
+    self:SetOption(checked)
+    self:ApplySetting(checked)
+end
+
+function nReputationMixin:Update()
+    local currentValue = nReputationDB[self.optionName]
+    self:SetChecked(currentValue)
+    self:ApplySetting()
+end
+
+function nReputationMixin:SetOption()
+    nReputationDB[self.optionName] = self:GetChecked()
+end
+
+function nReputationMixin:ApplySetting()
+    if ( self:GetChecked() ) then
+        self:TurnOn()
+    else
+        self:TurnOff()
+    end
+end
+
+function nReputationMixin:OnEvent(event, ...)
+	if ( event == "CHAT_MSG_COMBAT_FACTION_CHANGE" ) then
+        local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+
+		local pattern_standing_inc = gsub(gsub(FACTION_STANDING_INCREASED, "(%%s)", "(.+)"), "(%%d)", "(%%d+)")
+		local s1, e1, faction, amount = find(arg1, pattern_standing_inc)
+
+		if ( s1 ~= nil and amount ~= nil ) then
+			if ( faction ~= GUILD ) then
+				self:SetWatched(faction)
+			end
+        end
+    elseif ( event == "VARIABLES_LOADED" ) then
+        self:Update()
+        self:UnregisterEvent(event)
+	end
+end
+
+function nReputationMixin:SetWatched(newFaction)
     if ( running ) then
         return
     end
@@ -49,26 +109,4 @@ function nRep:SetWatched(newFaction)
         i = i + 1
     end
     running = nil
-end
-
-function nReputation_OnLoad(self)
-	self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
-	nRep:RegisterDefaultSetting("Toggle", true)
-end
-
-function nReputation_OnEvent(self, event, ...)
-	if ( event == "CHAT_MSG_COMBAT_FACTION_CHANGE" ) then
-	    if ( not nReputationDB.Toggle ) then return end
-
-		local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
-
-		local pattern_standing_inc = gsub(gsub(FACTION_STANDING_INCREASED, "(%%s)", "(.+)"), "(%%d)", "(%%d+)")
-		local s1, e1, faction, amount = find(arg1, pattern_standing_inc)
-
-		if ( s1 ~= nil and amount ~= nil ) then
-			if ( faction ~= GUILD ) then
-				nRep:SetWatched(faction)
-			end
-		end
-	end
 end

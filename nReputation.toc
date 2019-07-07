@@ -1,8 +1,8 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: |cffCC3333 n|rReputation
 ## Notes: Auto change watched reputation.
 ## Author: Grimsbain
-## Version: 1.6b-release
+## Version: 2.0-release
 ## SavedVariablesPerCharacter: nReputationDB
 
 nReputation.xml
